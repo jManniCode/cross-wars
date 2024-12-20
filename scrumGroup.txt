@@ -1,0 +1,11 @@
+ScrumGroup: 
+
+Scrum Master: Sandra Andersson
+Scrum Group: Jonnas Manni,Viktor Torsén, Sandra Andersson, Jacob Westholm, Srecko Radivojevic, Oscar Krantz
+
+
+Använda Standard Artifakter:  
+
+
+
+
