@@ -1,6 +1,6 @@
 Guide Lines: 
     * Same namning convention for JS and C# code. 
-    * using snakeCase for variabels. 
+    * using camelCase for variabels. 
     * using _ for private variabels. 
-    * using CamelCase for Methods/Functions. 
+    * using PascalCase for Methods/Functions. 
     * nice and wholesome names. 
