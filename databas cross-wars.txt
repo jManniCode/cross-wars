@@ -1,3 +1,9 @@
+create database crosswarsdatabase
+
+-----------------------------
+öppna en ny queryconsole i crosswarsdatabase och kör resten av queries
+
+
 create table words
 (
     id   integer not null
