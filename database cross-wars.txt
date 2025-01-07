@@ -7,7 +7,7 @@ create database crosswarsdatabase
 
 create table words
 (
-    id   integer not null
+    id   integer generated always as identity
         constraint words_pk
             primary key,
     word varchar,
@@ -19,7 +19,7 @@ alter table words
 
 create table cross_word
 (
-    id                 integer not null
+    id                 integer generated always as identity
         constraint cross_word_pk
             primary key,
     grid_row_length    integer,
@@ -47,7 +47,7 @@ alter table cross_word_letter_placement
 
 create table player
 (
-    id     integer not null
+    id     integer generated always as identity
         constraint player_pk
             primary key,
     name   varchar,
@@ -59,7 +59,7 @@ alter table player
 
 create table game
 (
-    id             integer not null
+    id             integer generated always as identity
         constraint game_pk
             primary key,
     cross_word     integer
