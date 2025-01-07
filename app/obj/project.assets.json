@@ -19,6 +19,7 @@
       "packagesPath": "C:\\Users\\Jonas\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\Jonas\\repos\\c#\\grupparbeten\\cross-wars\\app\\obj\\",
       "projectStyle": "PackageReference",
+      "UsingMicrosoftNETSdk": false,
       "configFilePaths": [
         "C:\\Users\\Jonas\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
