@@ -1,7 +1,0 @@
-INSERT INTO words (word, hint)
-VALUES
-    ('Apple', 'A fruit that keeps the doctor away.'),
-    ('Ocean', 'A vast body of saltwater covering most of the Earth.'),
-    ('Bridge', 'A structure connecting two places, often over water.'),
-    ('Clock', 'Tells time'),
-    ('Chair', 'You sit on it');
