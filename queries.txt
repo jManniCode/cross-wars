@@ -48,3 +48,14 @@ values  (1,' ', 4,1),
 
 -- place a letter at a tile e.g. (4,1)
 update placed_letters SET letter='C' where game=1 AND row=4 AND "column"=1;
+
+-- update score
+UPDATE game SET points_player1 = 1
+WHERE game.id = 1;
+
+UPDATE game SET points_player2 = 1
+WHERE game.id = 1;
+
+-- end game
+UPDATE game SET ended = true
+WHERE game.id = 1;
