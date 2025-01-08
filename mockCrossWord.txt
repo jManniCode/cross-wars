@@ -1,9 +1,23 @@
+--Create a list of words with hints 
+
+INSERT INTO words (word, hint)
+VALUES
+    ('Apple', 'A fruit that keeps the doctor away.'),
+    ('Ocean', 'A vast body of saltwater covering most of the Earth.'),
+    ('Bridge', 'A structure connecting two places, often over water.'),
+    ('Clock', 'Tells time'),
+    ('Chair', 'You sit on it');
+
+
+-- Create a cross word 
 
 INSERT INTO cross_word(grid_row_length, grid_column_length)
 values (10,10);
 --- create crossword first 
 -- make sure it has  id 1 or change value. 
 
+
+-- Place words in a crossWord letter by letter 
 INSERT  INTO cross_word_letter_placement(cross_word,word,letter,row,"column")
 values (1,5 ,'C' , 4,1),(1,5,'H',5,1)
 ,(1,5,'A',6,1),(1,5,'I',7,1),(1,5,'R',8,1)
