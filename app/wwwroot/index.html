@@ -9,28 +9,8 @@
 
 </head>
 <body>
-    <div class="lanes" id="toplane">
-        <p id="logo-text"> Cross Wars</p> 
-        <div class="opponent-playpen">
-            <div class="emptytile"></div>
-            <div class="emptytile"></div>
-            <div class="emptytile"></div>
-            <div class="emptytile"></div>
-            <div class="emptytile"></div>
-            
-        </div>
-        
-        <div class="matchinfo">
-            <h3>Matchresult</h3>
-            <p id="p1info">Player1: 1 Wins</p>
-            <p id="p2info">Player2: 4 Wins</p>
-            
-        </div>
-        
-    </div>
-    
-    <div class="lanes" id="midlane">
-        <div >
+        <div class = "leftSection" >
+            <h2 id="logo-text"> Cross Wars</h2>
             <p class="pointHolder " id="pointsP1">
                 Player1: 1p 
             </p>
@@ -45,17 +25,49 @@
             </div>
             
         </div>
-        <div>
-            
-        </div>
-        <div>
-            
-        </div>
-    </div> 
-
-    <div class="lanes" id="bottomlane">
+        
+        
     
+    <main >
+        <div class="lanes" id="toplane">
+       
+            <div class="opponent-playpen">
+                <div class="emptytile"></div>
+                <div class="emptytile"></div>
+                <div class="emptytile"></div>
+                <div class="emptytile"></div>
+                <div class="emptytile"></div>            
+            </div>
+        </div>
+        <div class="lanes" id="crossword">
+            <div>1</div>
+            <div>2</div>
+            <div>3</div>
+            <div>4</div>
+            <div>5</div>
+            <div>6</div>
+            <div>7</div>
+            <div>8</div>
+        </div>
+    <div class="lanes" id="bottomlane">
+        <div class="player-playpen">
+            <div class="emptytile"></div>
+            <div class="emptytile"></div>
+            <div class="emptytile"></div>
+            <div class="emptytile"></div>
+            <div class="emptytile"></div>
+
+        </div>  
     </div>
+       
+    </main> 
+        <div class="matchinfo">
+            <h3>Matchresult</h3>
+            <p>Player One: <input type="number" id="p1info" value="0" readonly>wins</p>
+            <p>Player One: <input type="number" id="p2info" value="0" readonly>wins</p>
+            
+        </div>
+
 
     
 
