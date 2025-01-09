@@ -76,6 +76,9 @@ main {
   grid-template-rows: repeat(10, 1fr);  /* 10 equal rows */
   gap: 2px; /* Gap between grid cells */
   background-color: #958888;
+  .inactive{
+    opacity: 50% ;
+  }
 }
 .grid-item {
   border: 1px solid #999; /* Add border around each cell */
