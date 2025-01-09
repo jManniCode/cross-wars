@@ -1,27 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Jonas\\repos\\c#\\grupparbeten\\cross-wars\\app\\app.csproj": {}
+    "/Users/oskar/repos/CrossWars1/cross-wars/app/app.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Jonas\\repos\\c#\\grupparbeten\\cross-wars\\app\\app.csproj": {
+    "/Users/oskar/repos/CrossWars1/cross-wars/app/app.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Jonas\\repos\\c#\\grupparbeten\\cross-wars\\app\\app.csproj",
+        "projectUniqueName": "/Users/oskar/repos/CrossWars1/cross-wars/app/app.csproj",
         "projectName": "app",
-        "projectPath": "C:\\Users\\Jonas\\repos\\c#\\grupparbeten\\cross-wars\\app\\app.csproj",
-        "packagesPath": "C:\\Users\\Jonas\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Jonas\\repos\\c#\\grupparbeten\\cross-wars\\app\\obj\\",
+        "projectPath": "/Users/oskar/repos/CrossWars1/cross-wars/app/app.csproj",
+        "packagesPath": "/Users/oskar/.nuget/packages/",
+        "outputPath": "/Users/oskar/repos/CrossWars1/cross-wars/app/obj/",
         "projectStyle": "PackageReference",
-        "UsingMicrosoftNETSdk": false,
         "configFilePaths": [
-          "C:\\Users\\Jonas\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/oskar/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -44,6 +42,12 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
+          "dependencies": {
+            "Npgsql": {
+              "target": "Package",
+              "version": "[9.0.2, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -60,7 +64,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.404/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
