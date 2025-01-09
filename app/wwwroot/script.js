@@ -19,7 +19,16 @@ for (let i = 0; i < 100; i++) {
 
 const tile= document.getElementby
 
+function getIndex(row, column, columnlength){
+   return id = row * columnlength + column;
+    
+}
 
+function getCordinate(index, columnlength){
+    let row = Math.floor(index / columnlength)
+    let column = index % columnlength
+    return [row, column]
+}
 
 
 
