@@ -10,13 +10,14 @@ SELECT letter
 FROM cross_word_letter_placement cwl
 WHERE cwl.row = 4 AND cwl.column = 1;
 
+-- Creating 2 players
+INSERT INTO player(name, cookie) 
+values ('Viktor', 1),('Jacob',2);
+
 -- Creating a Game
 INSERT INTO game(cross_word, player1, player2, points_player1, points_player2, ended)
 values (1,1,2,0,0, false);
 
--- Creating 2 players
-INSERT INTO player(name, cookie) 
-values ('Viktor', 1),('Jacob',2);
 
 
 --Create empyt Game bord for game 1:
