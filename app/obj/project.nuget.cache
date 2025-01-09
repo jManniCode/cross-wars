@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "52ATbC857nw=",
+  "dgSpecHash": "mxkwhTK/s68=",
   "success": true,
-  "projectFilePath": "/Users/oskar/repos/CrossWars1/cross-wars/app/app.csproj",
+  "projectFilePath": "C:\\Users\\westh\\repos\\agile\\cross-wars\\app\\app.csproj",
   "expectedPackageFiles": [
-    "/Users/oskar/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
-    "/Users/oskar/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.2/microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
-    "/Users/oskar/.nuget/packages/npgsql/9.0.2/npgsql.9.0.2.nupkg.sha512"
+    "C:\\Users\\westh\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\8.0.2\\microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\westh\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\8.0.2\\microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "C:\\Users\\westh\\.nuget\\packages\\npgsql\\9.0.2\\npgsql.9.0.2.nupkg.sha512"
   ],
   "logs": []
 }

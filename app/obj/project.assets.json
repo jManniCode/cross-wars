@@ -185,19 +185,19 @@
     ]
   },
   "packageFolders": {
-    "/Users/oskar/.nuget/packages/": {}
+    "C:\\Users\\westh\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/oskar/repos/CrossWars1/cross-wars/app/app.csproj",
+      "projectUniqueName": "C:\\Users\\westh\\repos\\agile\\cross-wars\\app\\app.csproj",
       "projectName": "app",
-      "projectPath": "/Users/oskar/repos/CrossWars1/cross-wars/app/app.csproj",
-      "packagesPath": "/Users/oskar/.nuget/packages/",
-      "outputPath": "/Users/oskar/repos/CrossWars1/cross-wars/app/obj/",
+      "projectPath": "C:\\Users\\westh\\repos\\agile\\cross-wars\\app\\app.csproj",
+      "packagesPath": "C:\\Users\\westh\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\westh\\repos\\agile\\cross-wars\\app\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/Users/oskar/.nuget/NuGet/NuGet.Config"
+        "C:\\Users\\westh\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -219,7 +219,7 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "direct"
+        "auditMode": "all"
       }
     },
     "frameworks": {
@@ -247,7 +247,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/8.0.403/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
