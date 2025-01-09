@@ -71,4 +71,16 @@ main {
   height: 500px;
   width: 100%;
   border: 1px solid black;
+  display: grid;
+  grid-template-columns: repeat(10, 1fr); /* 10 equal columns */
+  grid-template-rows: repeat(10, 1fr);  /* 10 equal rows */
+  gap: 2px; /* Gap between grid cells */
+  background-color: #958888;
+}
+.grid-item {
+  border: 1px solid #999; /* Add border around each cell */
+  background-color: #fff; /* Background color for cells */
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center content in cells */
 }
