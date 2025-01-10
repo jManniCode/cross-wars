@@ -32,16 +32,16 @@ const button = document.getElementById("addName");
 const output = document.getElementById("output");
 
 // Define a function to handle the button click
-function handleButtonClick() {
+function handleButtonClick(e) {
   output.textContent = "Button was clicked!";
-  saveWord();
+  saveWord(e);
 }
 async function saveWord(e) {
   e.preventDefault(); // not reload page on form submit
   const fieldText = document.getElementById("nameField");
-  const newWord = fieldText.val();
+  const newWord = fieldText.value;
   console.log("newWord", newWord);
-  const response = await fetch("/add-name/", {
+  const response = await fetch("/add-player/", {
     // post (save new)
     method: "POST",
     headers: { "Content-Type": "application/json" },
