@@ -1,77 +1,63 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using app;
 using Npgsql;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using System;
 using System.Security.Cryptography;
-using app;
 
+// Initialize the database connection
 Database database = new();
-
-NpgsqlDataSource db;
-    db = database.Connection();
-
-
-
+NpgsqlDataSource db = database.Connection();
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
-// Use Swagger during development
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+app.UseDefaultFiles(); // Serve default files like index.html
+app.UseStaticFiles();  // Serve static files (CSS, JS, etc.)
+// Middleware to set cookies
+app.Use(async (context, next) =>
+{
+    const string clientIdCookieName = "ClientId";
 
-// Serve static files from wwwroot
-app.UseDefaultFiles(); // Serving index.html as the default file
-app.UseStaticFiles(); // Serves other static files like CSS, JS, images, etc.
+    if (!context.Request.Cookies.TryGetValue(clientIdCookieName, out var clientId))
+    {
+        clientId = GenerateUniqueClientId();
+        context.Response.Cookies.Append(clientIdCookieName, clientId, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = false,
+            SameSite = SameSiteMode.Strict,
+            MaxAge = TimeSpan.FromDays(365)
+        });
+    }
+    await next();
+});
 
-// Middleware to set or retrieve the client identifier cookie
-// app.Use(async (context, next) =>
-// {
-//     const string clientIdCookieName = "ClientId";
-//
-//     if (!context.Request.Cookies.TryGetValue(clientIdCookieName, out var clientId))
-//     {
-//         // Generate a new unique client ID
-//         clientId = GenerateUniqueClientId();
-//         context.Response.Cookies.Append(clientIdCookieName, clientId, new CookieOptions
-//         {
-//             HttpOnly = true, // Prevent client-side JavaScript from accessing the cookie
-//             Secure = false,   // Use only over HTTPS (false for dev)
-//             SameSite = SameSiteMode.Strict,
-//             MaxAge = TimeSpan.FromDays(365) // Cookie expiration
-//         });
-//         Console.WriteLine($"New client ID generated and set: {clientId}");
-//     }
-//     else
-//     {
-//         Console.WriteLine($"Existing client ID found: {clientId}");
-//     }
-//
-//     // Pass to the next middleware
-//     await next();
-// });
+// Initialize the Actions class and pass the database connection
+Actions actions = new(app, db);
 
-// Helper function to generate a unique client ID
-// static string GenerateUniqueClientId()
-// {
-//     using var rng = RandomNumberGenerator.Create();
-//     var bytes = new byte[16];
-//     rng.GetBytes(bytes);
-//     return Convert.ToBase64String(bytes);
-// }
-
-// Methods for processing routes from Actions class
-Actions actions = new(app);
-
+app.UseHttpsRedirection();
 app.Run();
 
-//
-// await using (var cmd = db.CreateCommand("SELECT * FROM player"))
-// await using (var reader = await cmd.ExecuteReaderAsync())
-//     while (await reader.ReadAsync())
-//     {
-//         Console.WriteLine("Hejsan Svejsan!");
-//         Console.WriteLine(
-//             $"{reader.GetInt32(0)} "+
-//             $"{reader.GetString(1)} "+
-//             $"{reader.GetString(2)} "); 
-//     }
+// Helper function to generate a unique client ID
+static string GenerateUniqueClientId()
+{
+    using var rng = RandomNumberGenerator.Create();
+    var bytes = new byte[16];
+    rng.GetBytes(bytes);
+    return Convert.ToBase64String(bytes);
+}

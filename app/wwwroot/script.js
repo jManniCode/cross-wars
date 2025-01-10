@@ -37,20 +37,38 @@ function handleButtonClick(e) {
   saveWord(e);
 }
 async function saveWord(e) {
-  e.preventDefault(); // not reload page on form submit
+  e.preventDefault(); // Prevent page reload on form submit
+
   const fieldText = document.getElementById("nameField");
-  const newWord = fieldText.value;
-  console.log("newWord", newWord);
-  const response = await fetch("/add-player/", {
-    // post (save new)
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ word: newWord }),
-  });
-  console.log("response", response);
-  const data = await response.json();
-  console.log("data", data);
-  output.textContent = newWord.text;
+  const newWord = fieldText.value.trim(); // Trim whitespace
+  if (!newWord) {
+    console.error("Input field is empty.");
+    output.textContent = "Please enter a word.";
+    return;
+  }
+
+  console.log("newWord:", newWord);
+
+  try {
+    const response = await fetch("/new-player/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ word: newWord }),
+    });
+
+    if (!response.ok) {
+      console.error("HTTP error:", response.status);
+      output.textContent = `Error: ${response.status}`;
+      return;
+    }
+
+    const data = await response.json();
+    console.log("data:", data);
+    output.textContent = data.message || "Player added successfully!";
+  } catch (error) {
+    console.error("Error:", error);
+    output.textContent = "An error occurred while adding the player.";
+  }
 }
 
 // Attach the click event to the button
