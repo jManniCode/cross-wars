@@ -4,8 +4,7 @@ using app;using Npgsql;Console.WriteLine("Hello, World!");
 Database database = new();
 
 NpgsqlDataSource db;
-
-db = database.Connection();
+    db = database.Connection();
 
 
 
