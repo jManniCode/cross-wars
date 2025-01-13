@@ -73,11 +73,11 @@ main {
   border: 1px solid black;
   display: grid;
   grid-template-columns: repeat(10, 1fr); /* 10 equal columns */
-  grid-template-rows: repeat(10, 1fr);  /* 10 equal rows */
+  grid-template-rows: repeat(10, 1fr); /* 10 equal rows */
   gap: 2px; /* Gap between grid cells */
   background-color: #958888;
-  .inactive{
-    opacity: 50% ;
+  .inactive {
+    opacity: 50%;
   }
 }
 .grid-item {
