@@ -73,8 +73,12 @@ create table game
             references player,
     points_player1 integer,
     points_player2 integer,
-    ended          boolean
+    ended          boolean, 
+    session        varchar
 );
+
+create unique index session_uindex
+    on public.game (session);
 
 alter table game
     owner to postgres;
