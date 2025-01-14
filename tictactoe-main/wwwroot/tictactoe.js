@@ -81,39 +81,43 @@ async function submitMove() {
   }
 }
 // refresh is a sequence to handle reflecting the current game state for any connected user
-async function refresh(){
-  // make sure you have a player
-  if(!player){
-    $('#add-player').show()
-  }else{
-    $('#add-player').hide()
-    // make sure you are joined to a game
-    if(!game) {
-      $('#add-game').show()
-    }else{
-      $('#add-game').hide()
+async function refresh() {
+  try {
+    // Kontrollera om spelare och spel är konfigurerade
+    if (!player) {
+      $('#add-player').show();
+    } else {
+      $('#add-player').hide();
+
+      if (!game) {
+        $('#add-game').show();
+      } else {
+        $('#add-game').hide();
+      }
     }
-  }
-  // until we have a game
-  if(!player || !game){
-    // disable tiles
-    $('#tictactoe input').prop('disabled', true);
-  }else {
-    // poll refresh continously to reflect the game state for both connected players
-    let timeout = setTimeout(async function () {
-      // check tiles update
+
+    // Om spelare eller spel saknas, inaktivera spelplanen
+    if (!player || !game) {
+      $('#tictactoe input').prop('disabled', true);
+    } else {
+      // Hämta de senaste spelade brickorna
       const response = await fetch('/api/played-tiles/' + game.id);
       const playedTilesUpdate = await response.json();
-      // only refresh the board if something has changed
-      if (playedTilesUpdate != playedTiles) {
+
+      // Endast uppdatera om något har ändrats
+      if (JSON.stringify(playedTilesUpdate) !== JSON.stringify(playedTiles)) {
         playedTiles = playedTilesUpdate;
-        // reflect played tiles
         showPlayableTiles(playedTiles);
-        // tell who's turn
         tellTurn(playedTiles);
       }
-    }, 1000);
-  }}
+    }
+  } catch (error) {
+    console.error('Error in refresh:', error);
+  } finally {
+    // Kör `refresh` igen efter en liten fördröjning
+    setTimeout(refresh, 1000); // Uppdatera varje sekund
+  }
+}
 // first call refresh when page has loaded to reflect inital state / rebuild current state
 refresh()
 
@@ -234,17 +238,21 @@ $('#tictactoe>input').on('click', playTile);
 function showPlayableTiles(playedTiles) {
   const playedTilesHash = {};
   for (let tile of playedTiles) {
-    playedTilesHash[tile.tile] = tile;
+    playedTilesHash[tile.tile] = tile; // Skapa en hash för snabb åtkomst till spelade rutor
   }
 
   $('#tictactoe input').each(function (index) {
-    const tile = playedTilesHash[index];
+    const tile = playedTilesHash[index]; // Hämta information om rutan från hashen
+
     if (tile) {
+      // Om rutan redan är spelad, visa bokstaven och lås rutan
       $(this).val(tile.value).prop('disabled', true);
     } else {
+      // Om det är spelarens tur, gör rutan spelbar
       if (player.id === game.currentTurn) {
-        $(this).prop('disabled', false);
+        $(this).prop('disabled', false).off('click').on('click', playTile);
       } else {
+        // Annars inaktivera rutan
         $(this).prop('disabled', true);
       }
     }
