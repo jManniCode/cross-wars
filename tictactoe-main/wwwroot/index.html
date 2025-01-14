@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicTacToe</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="tictactoe.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<h1>TicTacToe</h1>
+
+<form id="add-player">
+    <label>Create or get player</label>
+    <input type="text" name="name" placeholder="type your player name">
+    <input type="submit" value="save">
+</form>
+
+<form id="add-game">
+    <label>Create or connect to a game</label>
+    <input type="text" name="gamecode" placeholder="type a game code">
+    <input type="submit" value="start">
+</form>
+
+<p id="message2"></p>
+<p id="message"></p>
+<form id="tictactoe">
+</form>
+<button id="submit-move">Submit Move</button>
+</body>
+
+</html>

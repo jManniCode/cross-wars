@@ -1,0 +1,31 @@
+body {
+    background-color: aquamarine;
+}
+
+#message,
+#message2 {
+    color: darkred;
+    font-weight: bold;
+}
+
+#add-player{
+    display: none;
+}
+
+#add-game{
+    display: none;
+}
+
+#tictactoe {
+    display: grid;
+    grid-template-columns: repeat(10, 50px);
+    grid-template-rows: repeat(10, 50px);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+}
+
+#tictactoe>input {
+    cursor: pointer;
+    text-align: center;
+    font-size: 12px;
+}
