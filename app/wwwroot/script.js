@@ -71,5 +71,39 @@ async function saveWord(e) {
   }
 }
 
+
+async function addGame(e) {
+  e.preventDefault();
+
+  const gamecode = document.getElementById("sessionField").value;
+
+
+  try {
+    const response = await fetch('/session/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ word: gamecode }),
+    });
+
+    if (!response.ok) {
+      console.error("HTTP error:", response.status);
+      output.textContent = `Error: ${response.status}`;
+      return;
+    }
+
+    const data = await response.json();
+    console.log("data:", data);
+    output.textContent = data.message || "Game added successfully!";
+  } catch (error) {
+    console.error("Error:", error);
+    output.textContent = "An error occurred while adding the game.";
+  }
+}
+
+
+
 // Attach the click event to the button
 button.addEventListener("click", handleButtonClick);
+
+const gameButton = document.getElementById("addGame");
+gameButton.addEventListener("click", addGame);
