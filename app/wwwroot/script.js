@@ -3,18 +3,8 @@ const crossword = document.getElementById("crossword");
 // Loop to create 100 grid items (10x10 grid)
 const gridlist = [];
  loadCrossWord(); 
- createEmptyTiles(); 
-
-for (let i = 0; i <100 ; i++) {
-  // Create a new div element for each grid item
-  const gridItem = document.createElement("div");
-  gridlist.push(gridItem);
-  gridItem.classList.add("grid-item");
-
-  gridItem.classList.add("inactive");
-  gridItem.textContent = i; // Add a number to each cell
-  crossword.appendChild(gridItem); // Add to the grid container
-}
+ // createEmptyTiles("2","1"); 
+ compareLetter(1 , 4, 1, "c");
 
 
 
@@ -77,14 +67,12 @@ async function saveWord(e) {
 }
 
 
-async function createEmptyTiles(){
-  console.log("Creation begins")
+async function createEmptyTiles(gameId,crosswordId){
   const response = await fetch("api/SetupEmptyTiles", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ Game:"2", Crossword:"1"}),
+    body: JSON.stringify({ Game:gameId, Crossword:crosswordId}),
   });
-  console.log(response)
 } 
 
 // Attach the click event to the button
@@ -99,7 +87,7 @@ async function loadCrossWord(){
   
   console.log(rowLength*columnLength); 
   
-  //crossword.innerHTML=""; // reset crossWord
+  crossword.innerHTML=""; // reset crossWord
   
   for (let i = 0; i <100 ; i++) {
     // Create a new div element for each grid item
@@ -125,11 +113,17 @@ async function getCrossWordInfo(){
 }; 
 
 
-
-
-async function  setupCrossWord(crosswordIndex) {
-
-
-  
+async function compareLetter(crosswordId, row, column, char){
+let response = await fetch("api/compareLetter", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ crosswordId:crosswordId
+      , row:row, column:column, letter:char }),
+  });
 }
 
+async function getHints(crosswordId){
+  let response = await fetch("api/getHints", {
+    
+  });
+}

@@ -19,6 +19,7 @@ public class Actions
        
         app.MapGet("api/randomCrossWordInfo/",getCrossWordId );
         app.MapPost("api/SetupEmptyTiles", AddEmptyTiles);
+        app.MapPost("api/compareLetter", compareLetter);
         
         app.MapPost("/new-player/", async (HttpContext context) =>
         {
@@ -87,7 +88,7 @@ public class Actions
     }
 
     // - av typen 'WordRequest' som innehåller en property 'Word'
-    public async Task<IResult> AddEmptyTiles(HttpContext context)
+    private async Task<IResult> AddEmptyTiles(HttpContext context)
     {   
         var requestBody = await context.Request.ReadFromJsonAsync<GameInfo>();
         
@@ -165,7 +166,41 @@ public class Actions
         }
         return false;
     }
-    
 
+    async Task<bool> compareLetter(HttpContext context)
+    {
+        var requestBody = await context.Request.ReadFromJsonAsync<LetterInfo>();
+        var crosswordid = requestBody.crosswordId;
+        var row = requestBody.row;
+        var column = requestBody.column;
+        var letter = requestBody.letter;
+     
+        var correctLetter = await getLetter(crosswordid, row, column);
+        if (correctLetter == ' ')
+        {
+            return false; 
+            
+        }
+        return letter==correctLetter;
+        
+    }
+
+    async Task<char> getLetter(int crosswordId, int row, int column)
+    {
+        char letter =' ';
+        await using var cmd = _db.CreateCommand("select distinct letter from cross_word_letter_placement where cross_word=$1 and row=$2 and \"column\"=$3 ");
+        cmd.Parameters.AddWithValue(crosswordId);
+        cmd.Parameters.AddWithValue(row); 
+        cmd.Parameters.AddWithValue(column);
+        
+        await using var reader = await cmd.ExecuteReaderAsync(); 
+        while (await reader.ReadAsync())
+        {
+            letter = reader.GetChar(0);
+        }
+
+        return letter;
+    }
+    
     
 }
