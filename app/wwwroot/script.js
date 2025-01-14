@@ -13,7 +13,11 @@ for (let i = 0; i < 100; i++) {
 
   gridItem.classList.add("inactive");
   gridItem.textContent = i; // Add a number to each cell
+  gridItem.setAttribute("contenteditable", "true");
+  gridItem.setAttribute("id", `${i}`);
   crossword.appendChild(gridItem); // Add to the grid container
+
+
 }
 
 const tile = document.getElementby;
@@ -55,3 +59,5 @@ async function saveWord(e) {
 
 // Attach the click event to the button
 button.addEventListener("click", handleButtonClick);
+
+

@@ -5,10 +5,12 @@ body {
   height: 100vh;
   margin: 0;
 }
+
 .leftSection {
   padding-left: 10%;
   width: 10%;
 }
+
 main {
   flex-direction: column;
   display: flex;
@@ -17,6 +19,7 @@ main {
   padding-left: 1%;
   padding-right: 1%;
 }
+
 .matchinfo {
   padding-right: 10%;
   width: 10%;
@@ -30,10 +33,12 @@ main {
 .lanes#toplane {
   display: flex;
   justify-content: space-evenly;
+
   .opponent-playpen {
     display: flex;
     justify-content: space-evenly;
   }
+
   .emptytile {
     display: flex;
   }
@@ -41,14 +46,17 @@ main {
 
 .lanes#bottomlane {
   justify-content: center;
+
   .player-playpen {
     display: flex;
     justify-content: space-evenly;
   }
+
   .emptytile {
     display: flex;
   }
 }
+
 .emptytile {
   height: 5rem;
   width: 5rem;
@@ -67,23 +75,86 @@ main {
     align-self: center;
   }
 }
+
 #crossword {
   height: 500px;
   width: 100%;
   border: 1px solid black;
   display: grid;
-  grid-template-columns: repeat(10, 1fr); /* 10 equal columns */
-  grid-template-rows: repeat(10, 1fr);  /* 10 equal rows */
-  gap: 2px; /* Gap between grid cells */
+  grid-template-columns: repeat(10, 1fr);
+  /* 10 equal columns */
+  grid-template-rows: repeat(10, 1fr);
+  /* 10 equal rows */
+  gap: 2px;
+  /* Gap between grid cells */
   background-color: #958888;
-  .inactive{
-    opacity: 50% ;
+
+  .inactive {
+    opacity: 50%;
   }
 }
+
 .grid-item {
-  border: 1px solid #999; /* Add border around each cell */
-  background-color: #fff; /* Background color for cells */
+  border: 1px solid #999;
+  /* Add border around each cell */
+  background-color: #fff;
+  /* Initial background color for cells */
   display: flex;
   align-items: center;
-  justify-content: center; /* Center content in cells */
+  justify-content: center;
+  /* Center content in cells */
+  transition: all 0.3s ease;
+  /* Smooth transition for hover effects */
+  position: relative;
+  /* Enable pseudo-elements positioning */
+  overflow: hidden;
+  /* Clip any overflow for the hover effect */
+}
+
+.grid-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  /* Start outside of the element */
+  width: 200%;
+  /* Cover enough space for the diagonal gradient */
+  height: 200%;
+  background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a18cd1);
+  /* Gradient colors */
+  z-index: 0;
+  /* Place below content */
+  transition: all 0.5s ease;
+  /* Smooth transition for hover effect */
+  transform: rotate(0deg);
+  opacity: 0;
+}
+
+.grid-item:hover::before {
+  left: 0;
+  /* Move the gradient into view */
+  opacity: 0.5;
+  /* Make it visible */
+  transform: rotate(15deg);
+  /* Add a slight tilt to the gradient */
+}
+
+.grid-item:hover {
+  border-color: #555;
+  /* Change border color on hover */
+  transform: scale(1.05);
+  /* Slightly scale up the grid item */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  /* Add a subtle shadow */
+}
+
+.grid-item>* {
+  position: relative;
+  /* Ensure content is above the pseudo-element */
+  z-index: 1;
+  /* Keep content above the gradient */
+  color: #000;
+  /* Set text color to ensure visibility */
+  transition: color 0.3s ease;
+  /* Optional smooth color change on hover */
 }
