@@ -50,6 +50,10 @@ app.Use(async (context, next) =>
 // Initialize the Actions class and pass the database connection
 Actions actions = new(app, db);
 
+
+
+
+
 app.UseHttpsRedirection();
 app.Run();
 

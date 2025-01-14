@@ -2,19 +2,24 @@ const crossword = document.getElementById("crossword");
 
 // Loop to create 100 grid items (10x10 grid)
 const gridlist = [];
-for (let j = 0; j < 10; j++) {
-  gridlist.push([]);
-}
-for (let i = 0; i < 100; i++) {
+ loadCrossWord(); 
+ createEmptyTiles(); 
+
+for (let i = 0; i <100 ; i++) {
   // Create a new div element for each grid item
   const gridItem = document.createElement("div");
-  gridlist[Math.floor(i / 10)].push(gridItem);
+  gridlist.push(gridItem);
   gridItem.classList.add("grid-item");
 
   gridItem.classList.add("inactive");
   gridItem.textContent = i; // Add a number to each cell
   crossword.appendChild(gridItem); // Add to the grid container
 }
+
+
+
+
+
 
 const tile = document.getElementby;
 
@@ -53,7 +58,7 @@ async function saveWord(e) {
     const response = await fetch("/new-player/", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ word: newWord }),
+      body: JSON.stringify({ word: newWord })
     });
 
     if (!response.ok) {
@@ -71,5 +76,60 @@ async function saveWord(e) {
   }
 }
 
+
+async function createEmptyTiles(){
+  console.log("Creation begins")
+  const response = await fetch("api/SetupEmptyTiles", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ Game:"2", Crossword:"1"}),
+  });
+  console.log(response)
+} 
+
 // Attach the click event to the button
 button.addEventListener("click", handleButtonClick);
+
+
+
+async function loadCrossWord(){
+  const crossWordInfo=  await getCrossWordInfo();
+  let rowLength=parseInt(crossWordInfo[1]); 
+  let columnLength=parseInt(crossWordInfo[2]);
+  
+  console.log(rowLength*columnLength); 
+  
+  //crossword.innerHTML=""; // reset crossWord
+  
+  for (let i = 0; i <100 ; i++) {
+    // Create a new div element for each grid item
+    const gridItem = document.createElement("div");
+    gridlist.push(gridItem);
+    gridItem.classList.add("grid-item");
+
+    gridItem.classList.add("inactive");
+    gridItem.textContent = i; // Add a number to each cell
+    crossword.appendChild(gridItem); // Add to the grid container
+  }
+
+
+}
+async function GetValidTiles(crossword){
+  let index= await fetch()   
+}
+async function getCrossWordInfo(){
+  let index = await fetch("api/randomCrossWordInfo/ ");
+  const infoString = await index.text();
+  const info = infoString.split(',').filter(word => word.trim() !== ""); // Remove empty lines
+  return info; 
+}; 
+
+
+
+
+async function  setupCrossWord(crosswordIndex) {
+
+
+  
+}
+
