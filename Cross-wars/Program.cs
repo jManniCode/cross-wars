@@ -50,6 +50,4 @@ static string GenerateUniqueClientId()
 // and then in turn processed by methods as called from the routes definitions 
 CrossWarsActions game = new(app);
 
-
-// start the web application
 app.Run();

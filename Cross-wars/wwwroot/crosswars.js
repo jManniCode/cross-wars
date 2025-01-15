@@ -4,6 +4,9 @@ let playedTiles = [];
 let tiles = [];
 let selectedTile = null;
 let crosswordPlacements = {}; // Store placements for later validation
+let hintsPlacments={}
+let clues={}
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("tictactoe");
@@ -33,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function fetchCrossWordPlacements() {
+  crossword=1; 
+  columnlength=10; 
   try {
     const response = await fetch('/api/cross-word-placements');
     if (!response.ok) {
@@ -43,16 +48,21 @@ async function fetchCrossWordPlacements() {
     console.log('Crossword Placements:', placements);
 
     placements.forEach(placement => {
-      const tile = getIndex(parseInt(placement.row), parseInt(placement.column), 10);
+      const tile = getIndex(parseInt(placement.row), parseInt(placement.column),columnlength);
       crosswordPlacements[tile] = placement.letter.toUpperCase();
     });
+    await fetchHints(crossword,columnlength)
 
     for (let i = 0; i < 100; i++) {
       const inputElement = document.getElementById(`input-${i}`);
       if (inputElement) {
         if (crosswordPlacements[i]) {
           inputElement.disabled = false; // Enable user input
-        } else {
+        }else if(hintsPlacments[i])
+          { inputElement.setAttribute('disabled', true);
+            inputElement.innerText=hintsPlacments[i]; 
+
+          } else {
           inputElement.style.backgroundColor = 'transparent';
           inputElement.style.border = 'none';
           inputElement.disabled = true;
@@ -62,6 +72,18 @@ async function fetchCrossWordPlacements() {
   } catch (error) {
     console.error('Error fetching crossword placements:', error);
   }
+}
+
+async function fetchHints(crossword,columnlength){
+  hintNumbering=0; 
+ const response= await fetch(`/api/get-hints/${crossword}`)
+ console.log(response); 
+ const hints= await response.json();
+ hints.forEach(hint =>{ hintNumbering++; 
+  const tile= getIndex(parseInt(hint.positionRow), parseInt(hint.positionColumn),columnlength); 
+  hintsPlacments[tile]=hintNumbering;  
+  clues[hintNumbering]=hint.hintText; 
+}   ) 
 }
 
 function getIndex(row, column, columnlength) {
