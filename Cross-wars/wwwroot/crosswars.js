@@ -7,9 +7,24 @@ let crosswordPlacements = {}; // Store placements for later validation
 
 
 function CheckForWin(playedTiles, crosswordPlacements) {
+  let cwPlCount = 0;
   Object.entries(crosswordPlacements).forEach(([tile, letter], index) => {
-    console.log(`Index: ${index}, Tile: ${tile}, Letter: ${letter}`);
+    cwPlCount+=1;
+    //console.log(`Index: ${index}, Tile: ${tile}, Letter: ${letter}`);
+    
   });
+  console.log(`Played Tiles: ${playedTiles.length}, cwPlacements: ${cwPlCount}`);
+  const p1Score = parseInt(document.getElementById("player1-score").innerText, 10);
+  const p2Score = parseInt(document.getElementById("player2-score").innerText,10);
+  
+  console.log(`P1 score: ${p1Score}, P2 Score: ${p2Score}`)
+  
+  if(playedTiles.length === cwPlCount){
+    
+    $('#message').text('It is you turn, ' + player.name + ' to play a ' + player.tile)
+
+
+  }
 }
 
 
