@@ -5,6 +5,15 @@ let tiles = [];
 let selectedTile = null;
 let crosswordPlacements = {}; // Store placements for later validation
 
+
+function CheckForWin(playedTiles,crosswordPlacements){
+  crosswordPlacements.forEach(tile, index => {
+    console.log(`Index: ${index}: tile: ${tile}`)
+  } )
+  
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("tictactoe");
   
@@ -64,9 +73,11 @@ async function fetchCrossWordPlacements() {
         }
       }
     }
+     
   } catch (error) {
     console.error('Error fetching crossword placements:', error);
   }
+  
 }
 
 function getIndex(row, column, columnlength) {
@@ -214,6 +225,7 @@ async function submitMove() {
     console.error('Error during validation or move submission:', error);
     $('#message').text('An error occurred while validating your move.');
   }
+  CheckForWin(playedTiles,crosswordPlacements)
 }
 async function updateScores() {
   const response = await fetch(`/api/game-scores/${game.id}`);
