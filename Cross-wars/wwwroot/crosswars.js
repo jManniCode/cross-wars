@@ -53,9 +53,14 @@ async function fetchCrossWordPlacements() {
         if (crosswordPlacements[i]) {
           inputElement.disabled = false; // Enable user input
         } else {
+          console.log("ICKE AKTIV TILES")
           inputElement.style.backgroundColor = 'transparent';
           inputElement.style.border = 'none';
+          inputElement.readOnly = true;
           inputElement.disabled = true;
+          inputElement.style.pointerEvents = 'none';
+          inputElement.style.cursor = 'default';
+          
         }
       }
     }
