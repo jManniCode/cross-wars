@@ -1,4 +1,4 @@
-namespace TicTacToe;
+namespace CrossWars;
 
 using Npgsql;
 

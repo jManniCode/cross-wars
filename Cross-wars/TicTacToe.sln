@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TicTacToe", "TicTacToe.csproj", "{37CBC8F0-1B6B-49F3-BDAD-F5CA7FCD32A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CrossWars", "CrossWars.csproj", "{37CBC8F0-1B6B-49F3-BDAD-F5CA7FCD32A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

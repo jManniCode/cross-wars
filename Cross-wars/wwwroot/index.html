@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cross-Wars</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="crosswars.js" defer></script>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+
+  <body>
+    <main>
+      <section>
+        <h1>Cross-Wars</h1>
+        <form id="add-player" class="styled-form">
+          <label for="player-name">Create or Get Player</label>
+          <input
+            type="text"
+            id="player-name"
+            name="name"
+            placeholder="Type your player name"
+          />
+          <input type="submit" value="Save" />
+        </form>
+        <form id="add-game" class="styled-form">
+          <label for="game-code">Create or Connect to a Game</label>
+          <input
+            type="text"
+            id="game-code"
+            name="gamecode"
+            placeholder="Type a game code"
+          />
+          <input type="submit" value="Start" />
+        </form>
+        <p id="message2"></p>
+        <p id="message"></p>
+      </section>
+      <section>
+        <form id="tictactoe"></form>
+        <button id="submit-move">Submit Move</button>
+      </section>
+      <section>
+        <div id="scoreboard">
+          <p>Player 1 Score: <span id="player1-score">0</span></p>
+          <p>Player 2 Score: <span id="player2-score">0</span></p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

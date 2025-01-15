@@ -1,35 +1,46 @@
 using Npgsql;
-using TicTacToe.Records;
+using CrossWars.Records;
 
-namespace TicTacToe;
+namespace CrossWars;
 
-public class TicTacToeGame
+public class CrossWarsActions
 {
-    // initialize database
     Database database = new();
     private NpgsqlDataSource db;
     
-    // Routes are defined and registered for listening for network requests
-    // in the constructor below
-    // and then in turn processed by methods as called from the routes definitions 
-    public TicTacToeGame (WebApplication app)
+    public CrossWarsActions (WebApplication app)
     {
-        // Get database connection
         db = database.Connection();
         
-        // Map incomming request for current game data
         app.MapGet("/api/current-game/{gamecode}", GetCurrentGame);
-        
-        // Map incomming request for played tiles in game
         app.MapGet("/api/played-tiles/{id}", GetPlayedTiles);
+        app.MapPost("/api/validate-move", async (HttpContext context) =>
+        {
+            var requestBody = await context.Request.ReadFromJsonAsync<Move>();
+            if (requestBody?.tile is null || requestBody?.value is null || requestBody?.game is null)
+            {
+                return Results.BadRequest("tile, value, and game are required.");
+            }
+
+            bool isValid = await ValidateMove(requestBody.tile, requestBody.value, requestBody.game);
+            return Results.Ok(isValid);
+        });
         
-        // Map incomming request to check win for a game
+        app.MapGet("/api/played-tiles-status/{gameId}", async (int gameId) =>
+        {
+            var playedTilesWithStatus = await GetPlayedTilesWithStatus(gameId);
+            return Results.Ok(playedTilesWithStatus);
+        });
+        
+        app.MapGet("/api/cross-word-placements", async (HttpContext context) =>
+        {
+            var placements = await GetCrossWordPlacements();
+            return Results.Ok(placements);
+        });
+        
         app.MapGet("/api/check-win/{game}", CheckWin);
-        
-        // Map incomming request to add a player to a game
         app.MapPost("/api/add-player", async (HttpContext context) =>
         {
-            // Player, is a record that defines the post requestBody format
             var requestBody = await context.Request.ReadFromJsonAsync<Player>();
             if (requestBody?.name is null)
             {
@@ -39,7 +50,6 @@ public class TicTacToeGame
             return player.id > 0 ? Results.Ok(player) : Results.StatusCode(500);
         });
         
-        // Map incomming request to play a tile (make a move) in a game
         app.MapPost("/api/play-tile", async (HttpContext context) =>
         {
             var requestBody = await context.Request.ReadFromJsonAsync<Move>();
@@ -49,6 +59,25 @@ public class TicTacToeGame
             }
             bool success = await PlayTile(requestBody.tile, requestBody.player, requestBody.game, requestBody.value);
             return success ? Results.Ok(true) : Results.Ok(false);
+        });
+        
+        app.MapGet("/api/game-scores/{gameId}", async (int gameId) =>
+        {
+            await using var cmd = db.CreateCommand(
+                "SELECT player_1_score, player_2_score FROM games WHERE id = $1");
+            cmd.Parameters.AddWithValue(gameId);
+
+            await using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return Results.Ok(new
+                {
+                    Player1Score = reader.GetInt32(0),
+                    Player2Score = reader.GetInt32(1)
+                });
+            }
+
+            return Results.NotFound();
         });
     }
 
@@ -79,19 +108,16 @@ public class TicTacToeGame
                     reader.GetInt32(0), // tile
                     reader.GetInt32(1), // player
                     reader.GetInt32(2), // game
-                    reader.IsDBNull(3) ? null : reader.GetString(3) // value (kontrollera om det är NULL)
+                    reader.IsDBNull(3) ? null : reader.GetString(3) // value
                 ));
             }
         }
         return playedTiles;
     }
-    
-    // Add player, by player name. If player by that name don't exist in the database, a new player with that name is created, 
-    // otherwise the existing player is updated by the clientid, should it have changed.
     async Task<Player> AddPlayer(string name, string clientId)
     {
         // check if player already exists
-        await using var cmd = db.CreateCommand("SELECT * FROM players WHERE name = $1"); // check if player exists
+        await using var cmd = db.CreateCommand("SELECT * FROM players WHERE name = $1");
         cmd.Parameters.AddWithValue(name);
         await using (var reader = await cmd.ExecuteReaderAsync())
         {
@@ -100,16 +126,14 @@ public class TicTacToeGame
                 var dbClientId = reader.GetString(1);
                 if (clientId.Equals(dbClientId) == false)
                 {
-                    // if same name but different session, save new clientId to db
                     await using var cmd2 = db.CreateCommand("UPDATE players SET clientid = $1 WHERE id = $2");
                     cmd2.Parameters.AddWithValue(clientId);
                     cmd2.Parameters.AddWithValue(reader.GetInt32(0));
-                    await cmd2.ExecuteNonQueryAsync(); // Perform update
+                    await cmd2.ExecuteNonQueryAsync();
                 }
                 return new Player(reader.GetInt32(0), reader.GetString(1), clientId);
             }
         }
-        // if player did not exist we create a new player in the db
         await using var cmd3 = db.CreateCommand("INSERT INTO players (name, clientid) VALUES ($1, $2) RETURNING id");
         cmd3.Parameters.AddWithValue(name);
         cmd3.Parameters.AddWithValue(clientId);
@@ -121,38 +145,126 @@ public class TicTacToeGame
         return null;
     }
     
-    // Process incomming PlayTile from client
     async Task<bool> PlayTile(int tile, int player, int game, string value)
+{
+    // Konvertera tile till rad och kolumn
+    int row = tile / 10;
+    int column = tile % 10;
+
+    // Kontrollera om bokstaven är korrekt
+    await using var validationCmd = db.CreateCommand(
+        @"SELECT letter 
+          FROM cross_word_letter_placement 
+          WHERE row = $1 AND ""column"" = $2");
+    validationCmd.Parameters.AddWithValue(row);
+    validationCmd.Parameters.AddWithValue(column);
+
+    string correctLetter = null;
+    await using (var reader = await validationCmd.ExecuteReaderAsync())
     {
-        // Kontrollera om en tile redan är spelad
-        await using var cmd1 = db.CreateCommand("SELECT EXISTS (SELECT 1 FROM moves WHERE tile = $1 AND game = $2)");
-        cmd1.Parameters.AddWithValue(tile);
-        cmd1.Parameters.AddWithValue(game);
-        bool result = (bool)(await cmd1.ExecuteScalarAsync() ?? false);
-        Console.WriteLine($"Player {player} played at {tile} in game {game} with result {result}");
-        if (result)
+        if (await reader.ReadAsync())
         {
-            return false; // Om tile redan är spelad, returnera false
+            correctLetter = reader.GetString(0);
         }
-
-        // Infoga draget i databasen, inklusive value
-        await using var cmd = db.CreateCommand("INSERT INTO moves (tile, player, game, value) VALUES ($1, $2, $3, $4)");
-        cmd.Parameters.AddWithValue(tile);
-        cmd.Parameters.AddWithValue(player);
-        cmd.Parameters.AddWithValue(game);
-        cmd.Parameters.AddWithValue(value); // Lägg till value här
-        int rowsAffected = await cmd.ExecuteNonQueryAsync();
-
-        Console.WriteLine($"Rows affected: {rowsAffected}"); // Logga antalet rader som påverkas
-        return rowsAffected > 0; // Returnera true om insättningen lyckades
     }
 
+    if (correctLetter == null)
+    {
+        Console.WriteLine($"No letter found at tile {tile}.");
+        return false;
+    }
+
+    bool isCorrect = string.Equals(correctLetter, value, StringComparison.OrdinalIgnoreCase);
+
+    // Spara draget i `moves`-tabellen
+    await using var moveCmd = db.CreateCommand(
+        "INSERT INTO moves (tile, player, game, value) VALUES ($1, $2, $3, $4)");
+    moveCmd.Parameters.AddWithValue(tile);
+    moveCmd.Parameters.AddWithValue(player);
+    moveCmd.Parameters.AddWithValue(game);
+    moveCmd.Parameters.AddWithValue(value);
+    await moveCmd.ExecuteNonQueryAsync();
+
+    // Uppdatera poäng om bokstaven är korrekt
+    if (isCorrect)
+    {
+        string scoreColumn = player == GetPlayer1Id(game) ? "player_1_score" : "player_2_score";
+        await using var scoreCmd = db.CreateCommand(
+            $@"UPDATE games 
+               SET {scoreColumn} = {scoreColumn} + 10 
+               WHERE id = $1");
+        scoreCmd.Parameters.AddWithValue(game);
+        await scoreCmd.ExecuteNonQueryAsync();
+
+        Console.WriteLine($"{player} scored 10 points");
+    }
+
+    return true;
+}
+
+int GetPlayer1Id(int gameId)
+{
+    // Hämtar spelare 1:s ID från tabellen games
+    using var cmd = db.CreateCommand("SELECT player_1 FROM games WHERE id = $1");
+    cmd.Parameters.AddWithValue(gameId);
+    return (int)cmd.ExecuteScalar()!;
+}
+    
+    
+    async Task<bool> ValidateMove(int tile, string value, int gameId)
+    {
+        int row = tile / 10;
+        int column = tile % 10;
+        
+        await using var cmd = db.CreateCommand(
+            @"SELECT letter 
+      FROM cross_word_letter_placement 
+      WHERE row = $1 AND ""column"" = $2"
+        );
+        cmd.Parameters.AddWithValue(row);
+        cmd.Parameters.AddWithValue(column);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            var correctLetter = reader.GetString(0);
+            return string.Equals(correctLetter, value, StringComparison.OrdinalIgnoreCase);
+        }
+        return false;
+    }
+    
+    async Task<List<dynamic>> GetPlayedTilesWithStatus(int gameId)
+    {
+        var playedTilesWithStatus = new List<dynamic>();
+
+        await using var cmd = db.CreateCommand(
+            @"SELECT m.tile, m.value, cwl.letter, 
+                 CASE 
+                   WHEN m.value = cwl.letter THEN 'correct'
+                   ELSE 'incorrect'
+                 END AS status
+          FROM moves m
+          LEFT JOIN cross_word_letter_placement cwl
+          ON m.tile = (cwl.row * 10 + cwl.""column"")
+          WHERE m.game = $1"
+        );
+        cmd.Parameters.AddWithValue(gameId);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            playedTilesWithStatus.Add(new
+            {
+                Tile = reader.GetInt32(0),
+                Value = reader.GetString(1),
+                Status = reader.GetString(3)
+            });
+        }
+        return playedTilesWithStatus;
+    }
+    
     async Task<List<int>?> CheckWin(int game)
     {
-        
-        // Defining wins, using a list of Tuples with indices. A Tuple is a read only, fixed size, list-type structure.
-        // The indices are a serialization of the tiles in our tictactoe game with the top left index being 0 and the bottom right being 8.
-        // Serializing game boards like this is a common and practical solution. 
         var winningVectors = new List<Tuple<int, int, int>>
         {
             // Horizontal wins 
@@ -222,5 +334,21 @@ public class TicTacToeGame
         // if we don't have a match, return null
         return null;
     }
-    
+    private async Task<List<CrossWordPlacement>> GetCrossWordPlacements()
+    {
+        var placements = new List<CrossWordPlacement>();
+        await using var cmd = db.CreateCommand("SELECT word, letter, row, \"column\" FROM cross_word_letter_placement");
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            placements.Add(new CrossWordPlacement
+            {
+                Word = reader.GetInt32(0),
+                Letter = reader.GetString(1),
+                Row = reader.GetInt32(2),
+                Column = reader.GetInt32(3)
+            });
+        }
+        return placements;
+    }
 }
