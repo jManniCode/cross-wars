@@ -6,11 +6,10 @@ let selectedTile = null;
 let crosswordPlacements = {}; // Store placements for later validation
 
 
-function CheckForWin(playedTiles,crosswordPlacements){
-  crosswordPlacements.forEach(tile, index => {
-    console.log(`Index: ${index}: tile: ${tile}`)
-  } )
-  
+function CheckForWin(playedTiles, crosswordPlacements) {
+  Object.entries(crosswordPlacements).forEach(([tile, letter], index) => {
+    console.log(`Index: ${index}, Tile: ${tile}, Letter: ${letter}`);
+  });
 }
 
 
@@ -49,7 +48,6 @@ async function fetchCrossWordPlacements() {
     }
 
     const placements = await response.json();
-    console.log('Crossword Placements:', placements);
 
     placements.forEach(placement => {
       const tile = getIndex(parseInt(placement.row), parseInt(placement.column), 10);
@@ -170,7 +168,7 @@ async function submitMove() {
     $('#message').text('Please select a tile before submitting.');
     return;
   }
-
+  CheckForWin(playedTiles,crosswordPlacements)
   const tileIndex = tiles.indexOf(parseInt(selectedTile.id.replace('input-', '')));
   const inputValue = selectedTile.value.toUpperCase();
 
@@ -225,12 +223,10 @@ async function submitMove() {
     console.error('Error during validation or move submission:', error);
     $('#message').text('An error occurred while validating your move.');
   }
-  CheckForWin(playedTiles,crosswordPlacements)
 }
 async function updateScores() {
   const response = await fetch(`/api/game-scores/${game.id}`);
   const data = await response.json();
-  console.log("Scores:", data); // Kontrollera att detta loggar rätt värden
 
   // Kontrollera att dessa element faktiskt finns i HTML
   document.getElementById("player1-score").innerText = data.player1Score;
