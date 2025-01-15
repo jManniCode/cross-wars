@@ -59,8 +59,9 @@ async function fetchCrossWordPlacements() {
         if (crosswordPlacements[i]) {
           inputElement.disabled = false; // Enable user input
         }else if(hintsPlacments[i])
-          { inputElement.setAttribute('disabled', true);
-            inputElement.innerText=hintsPlacments[i]; 
+          { inputElement.value = hintsPlacments[i];
+            inputElement.readOnly = true;
+            inputElement.style.backgroundColor = '#FFFACD'; 
 
           } else {
           inputElement.style.backgroundColor = 'transparent';
