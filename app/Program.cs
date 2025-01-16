@@ -39,7 +39,7 @@ app.Use(async (context, next) =>
         context.Response.Cookies.Append(clientIdCookieName, clientId, new CookieOptions
         {
             HttpOnly = true,
-            Secure = false,
+            Secure = app.Environment.IsDevelopment() ? false : true,
             SameSite = SameSiteMode.Strict,
             MaxAge = TimeSpan.FromDays(365)
         });
