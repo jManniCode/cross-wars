@@ -149,3 +149,8 @@ main {
   cursor: pointer;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+input[disabled] {
+  pointer-events: none; /* Prevent any interaction (click, hover, etc.) */
+  cursor: default; /* Change cursor to default arrow */
+}

@@ -8,6 +8,34 @@ let hintsPlacments={}
 let clues={}
 
 
+
+function CheckForWin(playedTiles, crosswordPlacements) {
+  const cwPlCount = Object.keys(crosswordPlacements).length;
+
+  console.log(`Played Tiles: ${playedTiles.length}, Total Placements: ${cwPlCount}`);
+
+  // Check if the game is over
+  if (playedTiles.length > 0 && playedTiles.length === cwPlCount) {
+    const p1Score = parseInt(document.getElementById("player1-score").innerText, 10);
+    const p2Score = parseInt(document.getElementById("player2-score").innerText, 10);
+
+    console.log(`P1 score: ${p1Score}, P2 Score: ${p2Score}`);
+
+    // Determine the winner
+    if (p1Score > p2Score) {
+      $('#message').text('Player 1 is the winner with a score of ' + p1Score + '!');
+    } else if (p2Score > p1Score) {
+      $('#message').text('Player 2 is the winner with a score of ' + p2Score + '!');
+    } else {
+      $('#message').text('It\'s a tie! Both players scored ' + p1Score + '!');
+    }
+    return true; // Game over
+  }
+
+  return false; // Game is still ongoing
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("tictactoe");
   
@@ -67,9 +95,10 @@ async function fetchCrossWordPlacements() {
           } else {
           inputElement.style.backgroundColor = 'transparent';
           inputElement.style.border = 'none';
+          inputElement.readOnly = true;
           inputElement.disabled = true;
-          inputElement.style.pointerEvents = 'none'
-          
+          inputElement.style.pointerEvents = 'none';
+          inputElement.style.cursor = 'default';
           
         }
       }
@@ -83,6 +112,7 @@ async function fetchCrossWordPlacements() {
   } catch (error) {
     console.error('Error fetching crossword placements:', error);
   }
+  
 }
 
 async function fetchHints(crossword,columnlength){
@@ -138,9 +168,14 @@ function tellTurn(playedTiles){
     // if it's their turn we disable all tiles for us
     $('#tictactoe input').prop('disabled', true);
   }
-}
+
+  }
 
 async function refresh() {
+  if (CheckForWin(playedTiles, crosswordPlacements)) {
+    console.log("Game over. No further actions allowed.");
+    return; // Stop further actions after the game is over
+  }
   try {
     if (!player) {
       $('#add-player').show();
@@ -190,7 +225,7 @@ async function submitMove() {
     $('#message').text('Please select a tile before submitting.');
     return;
   }
-
+  
   const tileIndex = tiles.indexOf(parseInt(selectedTile.id.replace('input-', '')));
   const inputValue = selectedTile.value.toUpperCase();
 
@@ -227,7 +262,7 @@ async function submitMove() {
     });
 
     const moveAccepted = await saveResponse.json();
-
+  
     if (moveAccepted) {
       const playedTilesWithStatusResponse = await fetch(`/api/played-tiles-status/${game.id}`);
       const playedTilesWithStatus = await playedTilesWithStatusResponse.json();
