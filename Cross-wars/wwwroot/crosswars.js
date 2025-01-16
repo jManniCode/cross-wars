@@ -63,10 +63,6 @@ async function fetchCrossWordPlacements() {
           { inputElement.value = hintsPlacments[i];
             inputElement.readOnly = true;
             inputElement.style.backgroundColor = '#FFFACD'; 
-            let hintBox= document.getElementById("hint-list"); 
-            let list_item =document.createElement(`li`);
-            list_item.innerText=`${clues[i]}`; 
-            hintBox.appendChild(list_item); 
 
           } else {
           inputElement.style.backgroundColor = 'transparent';
@@ -77,6 +73,12 @@ async function fetchCrossWordPlacements() {
           
         }
       }
+    }
+    let hintBox= document.getElementById("hint-list"); 
+    for(let i=1; i<Object.keys(clues).length+1;i++  ){
+      let list_item =document.createElement(`li`);
+      list_item.innerText=`${clues[i]}`; 
+      hintBox.appendChild(list_item); 
     }
   } catch (error) {
     console.error('Error fetching crossword placements:', error);
@@ -90,7 +92,7 @@ async function fetchHints(crossword,columnlength){
  hints.forEach(hint =>{ hintNumbering++; 
   const tile= getIndex(parseInt(hint.positionRow), parseInt(hint.positionColumn),columnlength); 
   hintsPlacments[tile]=hintNumbering;  
-  clues[tile]=hint.hintText; 
+  clues[hintNumbering]=hint.hintText; 
 }   ) 
 }
 
