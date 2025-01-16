@@ -102,6 +102,7 @@ function getIndex(row, column, columnlength) {
 function selectTile(tile) {
   if (!tile.disabled) {
     selectedTile = tile; // Spara vald ruta
+    tile.maxLength = 1;
   }
 }
 function updateTileColors(playedTilesWithStatus) {
