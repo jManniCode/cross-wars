@@ -15,7 +15,7 @@ function CheckForWin(playedTiles, crosswordPlacements) {
   console.log(`Played Tiles: ${playedTiles.length}, Total Placements: ${cwPlCount}`);
 
   // Check if the game is over
-  if (playedTiles.length === cwPlCount) {
+  if (playedTiles.length > 0 && playedTiles.length === cwPlCount) {
     const p1Score = parseInt(document.getElementById("player1-score").innerText, 10);
     const p2Score = parseInt(document.getElementById("player2-score").innerText, 10);
 
