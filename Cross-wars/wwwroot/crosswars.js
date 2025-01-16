@@ -4,6 +4,9 @@ let playedTiles = [];
 let tiles = [];
 let selectedTile = null;
 let crosswordPlacements = {}; // Store placements for later validation
+let hintsPlacments={}
+let clues={}
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("tictactoe");
@@ -27,12 +30,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitButton = document.getElementById("submit-move");
   submitButton.addEventListener("click", submitMove);
   $('#tictactoe>input').on('click', playTile);
-  $('#add-player').on('submit', addPlayer)
+  $('#create-game').on('submit', newGame);
+  $('#add-player').on('submit', addPlayer)  
   $('#add-game').on('submit', addGame)
   fetchCrossWordPlacements();
 });
 
 async function fetchCrossWordPlacements() {
+  crossword=1; 
+  columnlength=10; 
   try {
     const response = await fetch('/api/cross-word-placements');
     if (!response.ok) {
@@ -43,25 +49,49 @@ async function fetchCrossWordPlacements() {
     console.log('Crossword Placements:', placements);
 
     placements.forEach(placement => {
-      const tile = getIndex(parseInt(placement.row), parseInt(placement.column), 10);
+      const tile = getIndex(parseInt(placement.row), parseInt(placement.column),columnlength);
       crosswordPlacements[tile] = placement.letter.toUpperCase();
     });
+    await fetchHints(crossword,columnlength)
 
     for (let i = 0; i < 100; i++) {
       const inputElement = document.getElementById(`input-${i}`);
       if (inputElement) {
         if (crosswordPlacements[i]) {
           inputElement.disabled = false; // Enable user input
-        } else {
+        }else if(hintsPlacments[i])
+          { inputElement.value = hintsPlacments[i];
+            inputElement.readOnly = true;
+            inputElement.style.backgroundColor = '#FFFACD'; 
+            let hintBox= document.getElementById("hint-list"); 
+            let list_item =document.createElement(`li`);
+            list_item.innerText=`${clues[i]}`; 
+            hintBox.appendChild(list_item); 
+
+          } else {
           inputElement.style.backgroundColor = 'transparent';
           inputElement.style.border = 'none';
           inputElement.disabled = true;
+          inputElement.style.pointerEvents = 'none'
+          
+          
         }
       }
     }
   } catch (error) {
     console.error('Error fetching crossword placements:', error);
   }
+}
+
+async function fetchHints(crossword,columnlength){
+  hintNumbering=0; 
+ const response= await fetch(`/api/get-hints/${crossword}`)
+ const hints= await response.json();
+ hints.forEach(hint =>{ hintNumbering++; 
+  const tile= getIndex(parseInt(hint.positionRow), parseInt(hint.positionColumn),columnlength); 
+  hintsPlacments[tile]=hintNumbering;  
+  clues[tile]=hint.hintText; 
+}   ) 
 }
 
 function getIndex(row, column, columnlength) {
@@ -72,6 +102,7 @@ function getIndex(row, column, columnlength) {
 function selectTile(tile) {
   if (!tile.disabled) {
     selectedTile = tile; // Spara vald ruta
+    tile.maxLength = 1;
   }
 }
 function updateTileColors(playedTilesWithStatus) {
@@ -112,6 +143,7 @@ async function refresh() {
     if (!player) {
       $('#add-player').show();
       $('#add-game').hide();
+      $('#create-game').hide();
       $('#tictactoe input').prop('disabled', true);
       return;
     } else {
@@ -120,10 +152,12 @@ async function refresh() {
 
     if (!game) {
       $('#add-game').show();
+      $('#create-game').show();
       $('#tictactoe input').prop('disabled', true);
       return;
     } else {
       $('#add-game').hide();
+      $('#create-game').hide();
     }
     
     const response = await fetch(`/api/played-tiles-status/${game.id}`);
@@ -233,6 +267,32 @@ async function addPlayer(e) {
   refresh()
 }
 
+
+
+async function newGame(e) {
+  e.preventDefault();
+
+  // Hämta spelkoden från formuläret
+  const gamecode = document.querySelector('#create-game input[name="name"]').value;
+
+  // Skicka en förfrågan till backend för att skapa spelet
+  const response = await fetch('/api/create-game/' + (gamecode), {
+    method: 'POST',
+  });
+
+  // Kontrollera svaret
+  const game = await response.json();
+
+  if (game) {
+    document.getElementById('message').textContent = 'Created game with code: ' + game.gamecode;
+  } else {
+    document.getElementById('message').textContent = 'Failed to create game with code: ' + gamecode;
+  }
+
+  // Uppdaterar sidan eller UI-komponenter om nödvändigt
+  refresh();
+}
+
 async function addGame(e) {
   e.preventDefault()
   const gamecode = $('#add-game>[name="gamecode"]').val()
@@ -297,3 +357,4 @@ function showPlayableTiles(playedTiles) {
     }
   });
 }
+
