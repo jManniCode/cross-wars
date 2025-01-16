@@ -4,6 +4,9 @@ let playedTiles = [];
 let tiles = [];
 let selectedTile = null;
 let crosswordPlacements = {}; // Store placements for later validation
+let hintsPlacments={}
+let clues={}
+
 
 
 function CheckForWin(playedTiles, crosswordPlacements) {
@@ -55,12 +58,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const submitButton = document.getElementById("submit-move");
   submitButton.addEventListener("click", submitMove);
   $('#tictactoe>input').on('click', playTile);
-  $('#add-player').on('submit', addPlayer)
+  $('#create-game').on('submit', newGame);
+  $('#add-player').on('submit', addPlayer)  
   $('#add-game').on('submit', addGame)
   fetchCrossWordPlacements();
 });
 
 async function fetchCrossWordPlacements() {
+  crossword=1; 
+  columnlength=10; 
   try {
     const response = await fetch('/api/cross-word-placements');
     if (!response.ok) {
@@ -68,19 +74,29 @@ async function fetchCrossWordPlacements() {
     }
 
     const placements = await response.json();
+    console.log('Crossword Placements:', placements);
 
     placements.forEach(placement => {
-      const tile = getIndex(parseInt(placement.row), parseInt(placement.column), 10);
+      const tile = getIndex(parseInt(placement.row), parseInt(placement.column),columnlength);
       crosswordPlacements[tile] = placement.letter.toUpperCase();
     });
+    await fetchHints(crossword,columnlength)
 
     for (let i = 0; i < 100; i++) {
       const inputElement = document.getElementById(`input-${i}`);
       if (inputElement) {
         if (crosswordPlacements[i]) {
           inputElement.disabled = false; // Enable user input
-        } else {
-          console.log("ICKE AKTIV TILES")
+        }else if(hintsPlacments[i])
+          { inputElement.value = hintsPlacments[i];
+            inputElement.readOnly = true;
+            inputElement.style.backgroundColor = '#FFFACD'; 
+            let hintBox= document.getElementById("hint-list"); 
+            let list_item =document.createElement(`li`);
+            list_item.innerText=`${clues[i]}`; 
+            hintBox.appendChild(list_item); 
+
+          } else {
           inputElement.style.backgroundColor = 'transparent';
           inputElement.style.border = 'none';
           inputElement.readOnly = true;
@@ -98,6 +114,17 @@ async function fetchCrossWordPlacements() {
   
 }
 
+async function fetchHints(crossword,columnlength){
+  hintNumbering=0; 
+ const response= await fetch(`/api/get-hints/${crossword}`)
+ const hints= await response.json();
+ hints.forEach(hint =>{ hintNumbering++; 
+  const tile= getIndex(parseInt(hint.positionRow), parseInt(hint.positionColumn),columnlength); 
+  hintsPlacments[tile]=hintNumbering;  
+  clues[tile]=hint.hintText; 
+}   ) 
+}
+
 function getIndex(row, column, columnlength) {
   let id = row * columnlength + column
   return (id);
@@ -106,6 +133,7 @@ function getIndex(row, column, columnlength) {
 function selectTile(tile) {
   if (!tile.disabled) {
     selectedTile = tile; // Spara vald ruta
+    tile.maxLength = 1;
   }
 }
 function updateTileColors(playedTilesWithStatus) {
@@ -123,12 +151,6 @@ function updateTileColors(playedTilesWithStatus) {
 function tellTurn(playedTiles){
   let yourMoves = 0;
   let otherMoves = 0;
-  
-  if(CheckForWin == false){
-    console.log("we have a winner");
-  }
-  else{
-  
   for(let tile of playedTiles){
     if(tile.player === player.id){
       yourMoves++
@@ -136,7 +158,6 @@ function tellTurn(playedTiles){
       otherMoves++
     }
   }
-  
   // player with tile X plays first
   if(player.tile === 'X' && yourMoves <= otherMoves || player.tile === 'O' && yourMoves < otherMoves){
     $('#message').text('It is you turn, ' + player.name + ' to play a ' + player.tile)
@@ -146,7 +167,7 @@ function tellTurn(playedTiles){
     // if it's their turn we disable all tiles for us
     $('#tictactoe input').prop('disabled', true);
   }
-}
+
   }
 
 async function refresh() {
@@ -158,6 +179,7 @@ async function refresh() {
     if (!player) {
       $('#add-player').show();
       $('#add-game').hide();
+      $('#create-game').hide();
       $('#tictactoe input').prop('disabled', true);
       return;
     } else {
@@ -166,10 +188,12 @@ async function refresh() {
 
     if (!game) {
       $('#add-game').show();
+      $('#create-game').show();
       $('#tictactoe input').prop('disabled', true);
       return;
     } else {
       $('#add-game').hide();
+      $('#create-game').hide();
     }
     
     const response = await fetch(`/api/played-tiles-status/${game.id}`);
@@ -192,7 +216,6 @@ async function refresh() {
   } finally {
     setTimeout(refresh, 1000);
   }
-  
 }
 refresh()
 
@@ -247,7 +270,6 @@ async function submitMove() {
       selectedTile.value = inputValue;
       selectedTile.disabled = true;
       selectedTile = null;
-      CheckForWin(playedTiles,crosswordPlacements)
       refresh();
     } else {
       $('#message').text('This tile is already taken.');
@@ -261,6 +283,7 @@ async function submitMove() {
 async function updateScores() {
   const response = await fetch(`/api/game-scores/${game.id}`);
   const data = await response.json();
+  console.log("Scores:", data); // Kontrollera att detta loggar rätt värden
 
   // Kontrollera att dessa element faktiskt finns i HTML
   document.getElementById("player1-score").innerText = data.player1Score;
@@ -278,6 +301,32 @@ async function addPlayer(e) {
   player = await response.json();
   $('#message').text(player.name + ' was added to the game')
   refresh()
+}
+
+
+
+async function newGame(e) {
+  e.preventDefault();
+
+  // Hämta spelkoden från formuläret
+  const gamecode = document.querySelector('#create-game input[name="name"]').value;
+
+  // Skicka en förfrågan till backend för att skapa spelet
+  const response = await fetch('/api/create-game/' + (gamecode), {
+    method: 'POST',
+  });
+
+  // Kontrollera svaret
+  const game = await response.json();
+
+  if (game) {
+    document.getElementById('message').textContent = 'Created game with code: ' + game.gamecode;
+  } else {
+    document.getElementById('message').textContent = 'Failed to create game with code: ' + gamecode;
+  }
+
+  // Uppdaterar sidan eller UI-komponenter om nödvändigt
+  refresh();
 }
 
 async function addGame(e) {
@@ -344,3 +393,4 @@ function showPlayableTiles(playedTiles) {
     }
   });
 }
+

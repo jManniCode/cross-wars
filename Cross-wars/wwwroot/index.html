@@ -23,6 +23,16 @@
           />
           <input type="submit" value="Save" />
         </form>
+        <form id="create-game" class="styled-form">
+          <label for="create-game">Create a Game</label>
+          <input
+                  type="text"
+                  id="game-id"
+                  name="name"
+                  placeholder="create a game code"
+          />
+          <input type="submit" value="Start" />
+        </form>        
         <form id="add-game" class="styled-form">
           <label for="game-code">Create or Connect to a Game</label>
           <input
@@ -35,6 +45,12 @@
         </form>
         <p id="message2"></p>
         <p id="message"></p>
+
+        <div id="hint-box">
+          <h3>Hints:</h3>
+          <ol id="hint-list">
+          </ol>
+        </div>
       </section>
       <section>
         <form id="tictactoe"></form>
