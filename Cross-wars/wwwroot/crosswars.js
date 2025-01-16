@@ -62,6 +62,10 @@ async function fetchCrossWordPlacements() {
           { inputElement.value = hintsPlacments[i];
             inputElement.readOnly = true;
             inputElement.style.backgroundColor = '#FFFACD'; 
+            let hintBox= document.getElementById("hint-list"); 
+            let list_item =document.createElement(`li`);
+            list_item.innerText=`${clues[i]}`; 
+            hintBox.appendChild(list_item); 
 
           } else {
           inputElement.style.backgroundColor = 'transparent';
@@ -78,12 +82,11 @@ async function fetchCrossWordPlacements() {
 async function fetchHints(crossword,columnlength){
   hintNumbering=0; 
  const response= await fetch(`/api/get-hints/${crossword}`)
- console.log(response); 
  const hints= await response.json();
  hints.forEach(hint =>{ hintNumbering++; 
   const tile= getIndex(parseInt(hint.positionRow), parseInt(hint.positionColumn),columnlength); 
   hintsPlacments[tile]=hintNumbering;  
-  clues[hintNumbering]=hint.hintText; 
+  clues[tile]=hint.hintText; 
 }   ) 
 }
 
