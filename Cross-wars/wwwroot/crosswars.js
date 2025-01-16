@@ -7,24 +7,29 @@ let crosswordPlacements = {}; // Store placements for later validation
 
 
 function CheckForWin(playedTiles, crosswordPlacements) {
-  let cwPlCount = 0;
-  Object.entries(crosswordPlacements).forEach(([tile, letter], index) => {
-    cwPlCount+=1;
-    //console.log(`Index: ${index}, Tile: ${tile}, Letter: ${letter}`);
-    
-  });
-  console.log(`Played Tiles: ${playedTiles.length}, cwPlacements: ${cwPlCount}`);
-  const p1Score = parseInt(document.getElementById("player1-score").innerText, 10);
-  const p2Score = parseInt(document.getElementById("player2-score").innerText,10);
-  
-  console.log(`P1 score: ${p1Score}, P2 Score: ${p2Score}`)
-  
-  if(playedTiles.length === cwPlCount){
-    
-    $('#message').text('It is you turn, ' + player.name + ' to play a ' + player.tile)
+  const cwPlCount = Object.keys(crosswordPlacements).length;
 
+  console.log(`Played Tiles: ${playedTiles.length}, Total Placements: ${cwPlCount}`);
 
+  // Check if the game is over
+  if (playedTiles.length === cwPlCount) {
+    const p1Score = parseInt(document.getElementById("player1-score").innerText, 10);
+    const p2Score = parseInt(document.getElementById("player2-score").innerText, 10);
+
+    console.log(`P1 score: ${p1Score}, P2 Score: ${p2Score}`);
+
+    // Determine the winner
+    if (p1Score > p2Score) {
+      $('#message').text('Player 1 is the winner with a score of ' + p1Score + '!');
+    } else if (p2Score > p1Score) {
+      $('#message').text('Player 2 is the winner with a score of ' + p2Score + '!');
+    } else {
+      $('#message').text('It\'s a tie! Both players scored ' + p1Score + '!');
+    }
+    return true; // Game over
   }
+
+  return false; // Game is still ongoing
 }
 
 
@@ -118,6 +123,12 @@ function updateTileColors(playedTilesWithStatus) {
 function tellTurn(playedTiles){
   let yourMoves = 0;
   let otherMoves = 0;
+  
+  if(CheckForWin == false){
+    console.log("we have a winner");
+  }
+  else{
+  
   for(let tile of playedTiles){
     if(tile.player === player.id){
       yourMoves++
@@ -125,6 +136,7 @@ function tellTurn(playedTiles){
       otherMoves++
     }
   }
+  
   // player with tile X plays first
   if(player.tile === 'X' && yourMoves <= otherMoves || player.tile === 'O' && yourMoves < otherMoves){
     $('#message').text('It is you turn, ' + player.name + ' to play a ' + player.tile)
@@ -135,8 +147,13 @@ function tellTurn(playedTiles){
     $('#tictactoe input').prop('disabled', true);
   }
 }
+  }
 
 async function refresh() {
+  if (CheckForWin(playedTiles, crosswordPlacements)) {
+    console.log("Game over. No further actions allowed.");
+    return; // Stop further actions after the game is over
+  }
   try {
     if (!player) {
       $('#add-player').show();
@@ -175,6 +192,7 @@ async function refresh() {
   } finally {
     setTimeout(refresh, 1000);
   }
+  
 }
 refresh()
 
@@ -183,7 +201,7 @@ async function submitMove() {
     $('#message').text('Please select a tile before submitting.');
     return;
   }
-  CheckForWin(playedTiles,crosswordPlacements)
+  
   const tileIndex = tiles.indexOf(parseInt(selectedTile.id.replace('input-', '')));
   const inputValue = selectedTile.value.toUpperCase();
 
@@ -220,7 +238,7 @@ async function submitMove() {
     });
 
     const moveAccepted = await saveResponse.json();
-
+  
     if (moveAccepted) {
       const playedTilesWithStatusResponse = await fetch(`/api/played-tiles-status/${game.id}`);
       const playedTilesWithStatus = await playedTilesWithStatusResponse.json();
@@ -229,6 +247,7 @@ async function submitMove() {
       selectedTile.value = inputValue;
       selectedTile.disabled = true;
       selectedTile = null;
+      CheckForWin(playedTiles,crosswordPlacements)
       refresh();
     } else {
       $('#message').text('This tile is already taken.');
