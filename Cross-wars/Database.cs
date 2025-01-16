@@ -1,21 +1,26 @@
-namespace app;
+namespace CrossWars;
 
 using Npgsql;
+
 public class Database
 {
+
+    // databasuppgifter
     private readonly string _host = "localhost";
     private readonly string _port = "5432";
     private readonly string _username = "postgres";
-    private readonly string _password = "admin132";
-    private readonly string _database = "crosswarsdatabase";
+    private readonly string _password = "Playa717"; // root OR postgres
+    private readonly string _database = "tictactoe";
 
     private NpgsqlDataSource _connection;
 
+    // metod som hämtar anslutningen
     public NpgsqlDataSource Connection()
     {
         return _connection;
-    } 
-    
+    }
+
+    // koppla upp till databasen (i constructorn)
     public Database()
     {
         // bygg en anslutningssträng (Adress och inloggning till databasen) 

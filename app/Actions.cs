@@ -36,8 +36,7 @@ public class Actions
                 return Results.Problem("An unexpected error occurred.", statusCode: 500);
             }
         });
-
-        app.MapPost("/session/", async (HttpContext context) =>
+app.MapPost("/session/", async (HttpContext context) =>
         {
             try
             {
@@ -61,6 +60,7 @@ public class Actions
             }
         });
 
+        
     }
 
     // Method to add a new player to the database
@@ -68,10 +68,7 @@ public class Actions
     {
         try
         {
-            await using var connection = await _db.OpenConnectionAsync();
-            await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO player (name, cookie) VALUES ($1, $2)";
-
+            await using var cmd = _db.CreateCommand("INSERT INTO player (name, cookie) VALUES ($1, $2)");
             cmd.Parameters.AddWithValue(name);
             cmd.Parameters.AddWithValue(cookie);
             int rowsAffected = await cmd.ExecuteNonQueryAsync();
@@ -85,8 +82,6 @@ public class Actions
         }
     }
     
-   
-    
     private async Task<bool> NewGame(string session)
     {
         Console.WriteLine("NewGame method called with session: " + session);
@@ -94,7 +89,7 @@ public class Actions
         {
             await using var connection = await _db.OpenConnectionAsync();
             await using var cmd = connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO game (session) VALUES ($1) Returning id";
+            cmd.CommandText = "INSERT INTO games (gamecode) VALUES ($1) Returning id";
             cmd.Parameters.AddWithValue(session);
             int newGameId = (int)await cmd.ExecuteScalarAsync();
             Console.WriteLine($"New Game ID: {newGameId}");
@@ -106,6 +101,6 @@ public class Actions
             return false;
         }
     }
+
     
-   
 }
