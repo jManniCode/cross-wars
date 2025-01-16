@@ -1,3 +1,4 @@
+using System.Xml;
 using Npgsql;
 using CrossWars.Records;
 
@@ -14,6 +15,7 @@ public class CrossWarsActions
         
         app.MapGet("/api/current-game/{gamecode}", GetCurrentGame);
         app.MapGet("/api/played-tiles/{id}", GetPlayedTiles);
+        app.MapGet("/api/get-hints/{crossWordId}",getHints);  
         app.MapPost("/api/validate-move", async (HttpContext context) =>
         {
             var requestBody = await context.Request.ReadFromJsonAsync<Move>();
@@ -96,7 +98,7 @@ public class CrossWarsActions
 
         
     }
-
+    
     async Task<Game>? GetCurrentGame(string gamecode)
     {
         await using var cmd = db.CreateCommand("SELECT * FROM games WHERE gamecode = $1");
@@ -399,4 +401,62 @@ int GetPlayer1Id(int gameId)
         }
         return placements;
     }
+
+
+
+    private async Task<List<Hints>> getHints(int crossWordId)
+    {
+        var wordIds = new List<int>();
+        var hintRowsPositions = new List<int>();  
+        var hintColumnsPositions = new List<int>();
+        var hintList = new List<Hints>(); 
+        await using var cmd = db.CreateCommand();
+        cmd.CommandText = "select distinct word from cross_word_letter_placement where cross_word=$1";
+        cmd.Parameters.AddWithValue(crossWordId);
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            wordIds.Add(reader.GetInt32(0));
+        }
+
+        foreach (var wordId in wordIds)
+        {   await using var  cmd2 = db.CreateCommand();
+            cmd2.CommandText = "select row, \"column\"  from cross_word_letter_placement where cross_word=$1 AND word=$2 order by row,\"column\" limit 2";
+            cmd2.Parameters.AddWithValue(crossWordId);
+            cmd2.Parameters.AddWithValue(wordId);
+            await using var reader2 = await cmd2.ExecuteReaderAsync();
+            int row = 0;
+            int column = 0; 
+            while (await reader2.ReadAsync())
+            {
+                row = Math.Abs(2 * row - reader2.GetInt32(0) );  //The query gathers the rows and column of the two first letters in the word
+                column = Math.Abs(2 * column - reader2.GetInt32(1) ); 
+                //Since the two letters are only diffrent by one step we can get the tile before
+                //the word by (position of first letter 1)- (position of second letter - poisition of first letter )
+                // <=> 2*(position of first letter)-(position of second letter)
+                //By starting at zero and using absolut value we set row, column to the position of the first letter 
+                // in the first iteration and in the second we execture the equation above to obtain the position of the hint
+                
+            }
+            hintRowsPositions.Add(row);
+            hintColumnsPositions.Add(column);
+        }
+
+        for (int i = 0; i < wordIds.Count; i++)
+        { await using var  cmd3 = db.CreateCommand(); 
+            cmd3.CommandText =" select hint from words where id = $1";
+            cmd3.Parameters.AddWithValue(wordIds[i]);
+            await using var reader3 = await cmd3.ExecuteReaderAsync();
+            while (await reader3.ReadAsync())
+            {
+                hintList.Add(new Hints(hintRowsPositions[i], 
+                    hintColumnsPositions[i], reader3.GetString(0)) );
+                
+            }
+        }
+
+
+        return hintList;
+    }
+
 }

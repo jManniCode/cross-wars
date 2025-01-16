@@ -4,10 +4,10 @@ using Npgsql;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Security.Cryptography;
+using System.Collections.Generic;
 
 // Initialize the database connection
 Database database = new();
@@ -15,20 +15,20 @@ NpgsqlDataSource db = database.Connection();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+// Lägg till tjänster
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Prioritera mainPage.html som standardfil
+app.UseDefaultFiles(new DefaultFilesOptions
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-app.UseDefaultFiles(); // Serve default files like index.html
-app.UseStaticFiles();  // Serve static files (CSS, JS, etc.)
-// Middleware to set cookies
+    DefaultFileNames = new List<string> { "mainPage.html" }
+});
+app.UseStaticFiles(); // Serve static files
+
+// Middleware för cookies
 app.Use(async (context, next) =>
 {
     const string clientIdCookieName = "ClientId";
@@ -47,13 +47,19 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Initialize the Actions class and pass the database connection
+// Endast aktivera Swagger i utvecklingsmiljön
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 Actions actions = new(app, db);
 
 app.UseHttpsRedirection();
 app.Run();
 
-// Helper function to generate a unique client ID
+// Helper-metod för att generera en unik klient-ID
 static string GenerateUniqueClientId()
 {
     using var rng = RandomNumberGenerator.Create();

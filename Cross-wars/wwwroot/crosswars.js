@@ -4,6 +4,9 @@ let playedTiles = [];
 let tiles = [];
 let selectedTile = null;
 let crosswordPlacements = {}; // Store placements for later validation
+let hintsPlacments={}
+let clues={}
+
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("tictactoe");
@@ -34,6 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function fetchCrossWordPlacements() {
+  crossword=1; 
+  columnlength=10; 
   try {
     const response = await fetch('/api/cross-word-placements');
     if (!response.ok) {
@@ -44,16 +49,26 @@ async function fetchCrossWordPlacements() {
     console.log('Crossword Placements:', placements);
 
     placements.forEach(placement => {
-      const tile = getIndex(parseInt(placement.row), parseInt(placement.column), 10);
+      const tile = getIndex(parseInt(placement.row), parseInt(placement.column),columnlength);
       crosswordPlacements[tile] = placement.letter.toUpperCase();
     });
+    await fetchHints(crossword,columnlength)
 
     for (let i = 0; i < 100; i++) {
       const inputElement = document.getElementById(`input-${i}`);
       if (inputElement) {
         if (crosswordPlacements[i]) {
           inputElement.disabled = false; // Enable user input
-        } else {
+        }else if(hintsPlacments[i])
+          { inputElement.value = hintsPlacments[i];
+            inputElement.readOnly = true;
+            inputElement.style.backgroundColor = '#FFFACD'; 
+            let hintBox= document.getElementById("hint-list"); 
+            let list_item =document.createElement(`li`);
+            list_item.innerText=`${clues[i]}`; 
+            hintBox.appendChild(list_item); 
+
+          } else {
           inputElement.style.backgroundColor = 'transparent';
           inputElement.style.border = 'none';
           inputElement.disabled = true;
@@ -66,6 +81,17 @@ async function fetchCrossWordPlacements() {
   } catch (error) {
     console.error('Error fetching crossword placements:', error);
   }
+}
+
+async function fetchHints(crossword,columnlength){
+  hintNumbering=0; 
+ const response= await fetch(`/api/get-hints/${crossword}`)
+ const hints= await response.json();
+ hints.forEach(hint =>{ hintNumbering++; 
+  const tile= getIndex(parseInt(hint.positionRow), parseInt(hint.positionColumn),columnlength); 
+  hintsPlacments[tile]=hintNumbering;  
+  clues[tile]=hint.hintText; 
+}   ) 
 }
 
 function getIndex(row, column, columnlength) {
@@ -305,29 +331,29 @@ async function playTile() {
         $('#message').text('This tile is already taken.');
         $(this).val('');
       }
+}
 
-  function showPlayableTiles(playedTiles) {
-    const playedTilesHash = {};
-    for (let tile of playedTiles) {
-      playedTilesHash[tile.tile] = tile; // Skapa en hash för snabb åtkomst till spelade rutor
-    }
-
-    $('#tictactoe input').each(function (index) {
-      const tile = playedTilesHash[index]; // Hämta information om rutan från hashen
-
-      if (tile) {
-        // Om rutan redan är spelad, visa bokstaven och lås rutan
-        $(this).val(tile.value).prop('disabled', true);
-      } else {
-        // Om det är spelarens tur, gör rutan spelbar
-        if (player.id === game.currentTurn) {
-          $(this).prop('disabled', false).off('click').on('click', playTile);
-        } else {
-          // Annars inaktivera rutan
-          $(this).prop('disabled', true);
-        }
-      }
-    });
+function showPlayableTiles(playedTiles) {
+  const playedTilesHash = {};
+  for (let tile of playedTiles) {
+    playedTilesHash[tile.tile] = tile; // Skapa en hash för snabb åtkomst till spelade rutor
   }
 
+  $('#tictactoe input').each(function (index) {
+    const tile = playedTilesHash[index]; // Hämta information om rutan från hashen
+
+    if (tile) {
+      // Om rutan redan är spelad, visa bokstaven och lås rutan
+      $(this).val(tile.value).prop('disabled', true);
+    } else {
+      // Om det är spelarens tur, gör rutan spelbar
+      if (player.id === game.currentTurn) {
+        $(this).prop('disabled', false).off('click').on('click', playTile);
+      } else {
+        // Annars inaktivera rutan
+        $(this).prop('disabled', true);
+      }
+    }
+  });
 }
+
