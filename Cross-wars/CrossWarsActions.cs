@@ -315,23 +315,7 @@ int GetPlayer1Id(int gameId)
     
     async Task<List<int>?> CheckWin(int game)
     {
-        var winningVectors = new List<Tuple<int, int, int>>
-        {
-            // Horizontal wins 
-            Tuple.Create(0, 1, 2),
-            Tuple.Create(3, 4, 5),
-            Tuple.Create(6, 7, 8),
-            
-            // Vertical wins
-            Tuple.Create(0, 3, 6),
-            Tuple.Create(1, 4, 7),
-            Tuple.Create(2, 5, 8),
-            
-            // Diagonal wins
-            Tuple.Create(0, 4, 8),
-            Tuple.Create(2, 4, 6)
-        };
-        
+       
         // Get the tiles for each player
         var player1tiles = new List<int>();
         var player2tiles = new List<int>();
@@ -358,29 +342,7 @@ int GetPlayer1Id(int gameId)
             }
         }
         
-        // Now lets see if a player has a win
-        int? winningPlayer = null;
-        foreach (var vector in winningVectors)
-        {
-            if (player1tiles.Contains(vector.Item1) && player1tiles.Contains(vector.Item2) &&
-                player1tiles.Contains(vector.Item3))
-            {
-                winningPlayer = player_1;
-            }else if (player2tiles.Contains(vector.Item1) && player2tiles.Contains(vector.Item2) &&
-                      player2tiles.Contains(vector.Item3))
-            {
-                winningPlayer = player_2; // we are not reporting who won.. that ends here, but we should
-            }
-            if(winningPlayer is not null){
-                Console.WriteLine($"Winning vector: {vector.Item1}, {vector.Item2}, {vector.Item3}");
-                // if we have a match, return the winning vector as a confirmation of the win
-                var winningVector = new List<int>();
-                winningVector.Add(vector.Item1);
-                winningVector.Add(vector.Item2);
-                winningVector.Add(vector.Item3);
-                return winningVector;
-            }
-        }
+       
         // if we don't have a match, return null
         return null;
     }

@@ -335,7 +335,7 @@ async function addGame(e) {
   const gamecode = $('#add-game>[name="gamecode"]').val()
   const response = await fetch('/api/current-game/' + gamecode)
   game = await response.json();
-  player.tile = (player.id === game.player_1)?'X':'O';
+  player.tile = (player.id === game.player_1)?'Player 1':'Player 2';
   if(game){
     $('#message').text('Connected to ' + game.gamecode)
   }else{
