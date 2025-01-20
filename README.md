@@ -7,14 +7,15 @@
   4. cmd: dotnet run
   5. Open localhost link twice (for multiplayer)
   6. In first session, enter Playername for P1.
-  7. Enter a game name
-  8. connect to made game name
+  7. In second session, enter Playername for P2
+  8. Enter a game name
+  9. connect to made game name
  
-  9. in secon tab, enter Playername for P2.
-  10. connect to game name in step 7.
+  
+  11. connect to game name in step 8.
  
-  11. Guess the words and enter 1 character in the crossword at a time.
-  12. switch tabs between turns.
+  12. Guess the words and enter 1 character in the crossword at a time.
+  13. switch tabs between turns.
 
 
 # additional planing tools: 
