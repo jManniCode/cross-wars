@@ -7,6 +7,31 @@ let crosswordPlacements = {}; // Store placements for later validation
 let hintsPlacments={}
 let clues={}
 
+function CheckForWin(playedTiles, crosswordPlacements) {
+  const cwPlCount = Object.keys(crosswordPlacements).length;
+
+  console.log(`Played Tiles: ${playedTiles.length}, Total Placements: ${cwPlCount}`);
+
+  // Check if the game is over
+  if (playedTiles.length > 0 && playedTiles.length === cwPlCount) {
+    const p1Score = parseInt(document.getElementById("player1-score").innerText, 10);
+    const p2Score = parseInt(document.getElementById("player2-score").innerText, 10);
+
+    console.log(`P1 score: ${p1Score}, P2 Score: ${p2Score}`);
+
+    // Determine the winner
+    if (p1Score > p2Score) {
+      $('#message').text('Player 1 is the winner with a score of ' + p1Score + '!');
+    } else if (p2Score > p1Score) {
+      $('#message').text('Player 2 is the winner with a score of ' + p2Score + '!');
+    } else {
+      $('#message').text('It\'s a tie! Both players scored ' + p1Score + '!');
+    }
+    return true; // Game over
+  }
+
+  return false; // Game is still ongoing
+}
 
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("tictactoe");
@@ -141,6 +166,10 @@ function tellTurn(playedTiles){
 }
 
 async function refresh() {
+  if (CheckForWin(playedTiles, crosswordPlacements)) {
+    console.log("Game over. No further actions allowed.");
+    return; // Stop further actions after the game is over
+  }
   try {
     if (!player) {
       $('#add-player').show();
