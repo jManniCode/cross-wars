@@ -132,65 +132,113 @@ public class CrossWarsActions
         }
         return playedTiles;
     }
-    async Task<Player> AddPlayer(string name, string clientId)
+
+private int? playerOneId = null; // ID för första spelaren
+private int? playerTwoId = null; // ID för andra spelaren
+
+async Task<Player> AddPlayer(string name, string clientId)
+{
+    // Kontrollera om spelaren redan finns
+    await using var cmd = db.CreateCommand("SELECT id, clientid FROM players WHERE name = $1");
+    cmd.Parameters.AddWithValue(name);
+    await using (var reader = await cmd.ExecuteReaderAsync())
     {
-        // check if player already exists
-        await using var cmd = db.CreateCommand("SELECT * FROM players WHERE name = $1");
-        cmd.Parameters.AddWithValue(name);
-        await using (var reader = await cmd.ExecuteReaderAsync())
+        if (await reader.ReadAsync())
         {
-            while (await reader.ReadAsync())
+            var playerId = reader.GetInt32(0);
+            var dbClientId = reader.GetString(1);
+
+            // Uppdatera clientId om det behövs
+            if (!clientId.Equals(dbClientId))
             {
-                var dbClientId = reader.GetString(1);
-                if (clientId.Equals(dbClientId) == false)
-                {
-                    await using var cmd2 = db.CreateCommand("UPDATE players SET clientid = $1 WHERE id = $2");
-                    cmd2.Parameters.AddWithValue(clientId);
-                    cmd2.Parameters.AddWithValue(reader.GetInt32(0));
-                    await cmd2.ExecuteNonQueryAsync();
-                }
-                return new Player(reader.GetInt32(0), reader.GetString(1), clientId);
+                await using var updateCmd = db.CreateCommand("UPDATE players SET clientid = $1 WHERE id = $2");
+                updateCmd.Parameters.AddWithValue(clientId);
+                updateCmd.Parameters.AddWithValue(playerId);
+                await updateCmd.ExecuteNonQueryAsync();
             }
+
+            // Spara spelar-ID till backend-variabler
+            AssignPlayerId(name, playerId);
+
+            return new Player(playerId, name, clientId);
         }
-        await using var cmd3 = db.CreateCommand("INSERT INTO players (name, clientid) VALUES ($1, $2) RETURNING id");
-        cmd3.Parameters.AddWithValue(name);
-        cmd3.Parameters.AddWithValue(clientId);
-        var result = await cmd3.ExecuteScalarAsync();
-        if (result != null && int.TryParse(result.ToString(), out int lastInsertedId))
-        {
-            return new Player(lastInsertedId, name, clientId);
-        }
-        return null;
     }
+
+    // Lägg till ny spelare om ingen hittades
+    await using var insertCmd = db.CreateCommand("INSERT INTO players (name, clientid) VALUES ($1, $2) RETURNING id");
+    insertCmd.Parameters.AddWithValue(name);
+    insertCmd.Parameters.AddWithValue(clientId);
+    var result = await insertCmd.ExecuteScalarAsync();
+
+    if (result != null && int.TryParse(result.ToString(), out int lastInsertedId))
+    {
+        AssignPlayerId(name, lastInsertedId);
+        return new Player(lastInsertedId, name, clientId);
+    }
+
+    throw new Exception("Failed to add player.");
+}
+
+// Metod för att tilldela spelar-ID
+private void AssignPlayerId(string name, int playerId)
+{
     
-    private async Task<bool> NewGame(string gamecode)
+    
+    if (playerOneId == null)
     {
-        try
-        {
-            Console.WriteLine($"Attempting to create game with gamecode: {gamecode}");
-            await using var cmd = db.CreateCommand("WITH latest_players AS (" +
-                                                   "SELECT id FROM players ORDER BY id DESC LIMIT 2)" +
-                                                   " INSERT INTO games (gamecode, player_1, player_2) SELECT $1, p1.id, p2.id" +
-                                                   " FROM (SELECT id FROM latest_players LIMIT 1 OFFSET 0) p1, " +
-                                                   " (SELECT id FROM latest_players LIMIT 1 OFFSET 1) p2 RETURNING id;");
-            cmd.Parameters.AddWithValue(gamecode);
-            var result = await cmd.ExecuteScalarAsync();
-
-            if (result != null && int.TryParse(result.ToString(), out int newGameId))
-            {
-                Console.WriteLine($"Successfully created game with ID: {newGameId}");
-                return true;
-            }
-
-            Console.WriteLine("Failed to insert game into database.");
-            return false;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error in NewGame: {ex.Message}");
-            return false;
-        }
+        playerOneId = playerId;
     }
+    else if (playerTwoId == null)
+    {
+        playerTwoId = playerId;
+    }
+}
+
+
+    
+private async Task<bool> NewGame(string gamecode)
+{
+    if (playerOneId == null || playerTwoId == null)
+    {
+        Console.WriteLine("Players not initialized for game creation.");
+        return false;
+    }
+
+    try
+    {
+        Console.WriteLine($"Attempting to create game with gamecode: {gamecode}");
+        await using var cmd = db.CreateCommand(
+            "INSERT INTO games (gamecode, player_1, player_2) VALUES ($1, $2, $3) RETURNING id"
+        );
+        cmd.Parameters.AddWithValue(gamecode);
+        cmd.Parameters.AddWithValue(playerOneId);
+        cmd.Parameters.AddWithValue(playerTwoId);
+        var result = await cmd.ExecuteScalarAsync();
+
+        if (result != null)
+        {
+            Console.WriteLine($"Game created with ID: {result}");
+            ResetPlayerIds(); // Återställ spelarna efter spel skapas
+            return true;
+        }
+
+        Console.WriteLine("Failed to insert game into database.");
+        return false;
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error in NewGame: {ex.Message}");
+        return false;
+    }
+}
+
+// Återställ spelarvariabler
+private void ResetPlayerIds()
+{
+    playerOneId = null;
+    playerTwoId = null;
+}
+
 
     
     
@@ -315,7 +363,8 @@ int GetPlayer1Id(int gameId)
     
     async Task<List<int>?> CheckWin(int game)
     {
-       
+        
+        
         // Get the tiles for each player
         var player1tiles = new List<int>();
         var player2tiles = new List<int>();
@@ -342,7 +391,9 @@ int GetPlayer1Id(int gameId)
             }
         }
         
-       
+        // Now lets see if a player has a win
+        int? winningPlayer = null;
+        
         // if we don't have a match, return null
         return null;
     }
