@@ -1,4 +1,4 @@
-CREATE DATABASE tictactoe
+CREATE DATABASE crosswars_db
 
 create table players
 (
